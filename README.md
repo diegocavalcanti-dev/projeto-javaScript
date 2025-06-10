@@ -163,6 +163,6 @@ Projeto desenvolvido por
 **Diego Cavalcanti**  
 [GitHub](https://github.com/diegocavalcanti-dev) | cavalcanti@hotmail.com
 
-Projeto acadêmico | Generation Brasil - 2024
+Projeto acadêmico | Generation Brasil - 2025
 
 ---
