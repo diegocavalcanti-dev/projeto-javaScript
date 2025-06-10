@@ -1,14 +1,19 @@
 import readlinesync = require("readline-sync");
 import { colors } from "./src/util/Colors";
 import { ProdutoFisico } from "./src/model/ProdutoFisico";
-import { Produto } from "./src/model/Produto";
+import { ProdutoController } from "./src/controller/ProdutoController";
 
 export function main() {
 
-    let produtos: Produto[] = [];
-    let id: number = 1;
-    let opcao: number, preco: number, quantidade: number, tamanho: number;
+    let produtos: ProdutoController = new ProdutoController();
+
+    produtos.cadastrar(new ProdutoFisico(produtos.gerarId(), "Nike Revolution", "Nike", 299.90, "Esportivo", 10, 41, "Preto"));
+    produtos.cadastrar(new ProdutoFisico(produtos.gerarId(), "Adidas RunFalcon", "Adidas", 279.90, "Corrida", 8, 40, "Azul"));
+    produtos.cadastrar(new ProdutoFisico(produtos.gerarId(), "Olympikus Tube", "Olympikus", 189.90, "Casual", 15, 39, "Branco"));
+
+    let opcao: number, id: number, preco: number, quantidade: number, tamanho: number;
     let nome: string, marca: string, categoria: string, cor: string;
+
 
     while (true) {
         console.log(colors.bg.black, colors.fg.greenstrong,
@@ -32,6 +37,7 @@ export function main() {
             process.exit(0);
         }
 
+        try {
         switch (opcao) {
             case 1:
                 console.log(colors.fg.whitestrong, "\n\nCadastrar Produto\n\n", colors.reset);
@@ -44,35 +50,29 @@ export function main() {
                 quantidade = readlinesync.questionInt("Quantidade em estoque: ");
                 preco = readlinesync.questionFloat("Preco (R$): ");
 
-                produtos.push(new ProdutoFisico(
-                    id++, nome, marca, preco, categoria, quantidade, tamanho, cor
+                produtos.cadastrar(new ProdutoFisico(
+                    produtos.gerarId(), nome, marca, preco, categoria, quantidade, tamanho, cor
                 ));
 
-                keyPress();
+                keyPress()
                 break;
             case 2:
                 console.log(colors.fg.whitestrong, "\n\nListar Produtos\n\n", colors.reset);
-                for (const produto of produtos) {
-                    produto.visualizar();
-                }
-                keyPress();
+                produtos.listarTodos();
+                keyPress()
                 break;
 
             case 3:
-                const idConsulta = readlinesync.questionInt("ID do produto: ");
-                const encontrado = produtos.find(p => p.id === idConsulta);
-                if (encontrado) {
-                    encontrado.visualizar();
-                } else {
-                    console.log("\nProduto não encontrado!");
-                }
-                keyPress();
+                id = readlinesync.questionInt("ID do produto: ");
+                produtos.procurarPorId(id);
+                keyPress()
                 break;
 
             case 4:
-                const idAtualizar = readlinesync.questionInt("ID do produto para atualizar: ");
-                const indice = produtos.findIndex(p => p.id === idAtualizar);
-                if (indice !== -1) {
+                id = readlinesync.questionInt("ID do produto para atualizar: ");
+                // to do - corrigir o let de produto do PRODUTO CONTROLLER
+                let produto = produtos.buscarNoArray(id);
+                if (produto) {
                     nome = readlinesync.question("Nome: ");
                     marca = readlinesync.question("Marca: ");
                     categoria = readlinesync.question("Categoria: ");
@@ -81,33 +81,41 @@ export function main() {
                     quantidade = readlinesync.questionInt("Quantidade em estoque: ");
                     preco = readlinesync.questionFloat("Preco (R$): ");
 
-                    produtos[indice] = new ProdutoFisico(
-                        idAtualizar, nome, marca, preco, categoria, quantidade, tamanho, cor
-                    );
-                    console.log("Produto atualizado com sucesso!");
+                    produtos.atualizar(new ProdutoFisico(
+                        id, nome, marca, preco, categoria, quantidade, tamanho, cor
+                    ));
                 } else {
                     console.log("\nProduto não encontrado!");
                 }
-                keyPress();
+                keyPress()
                 break;
 
             case 5:
-                const idDeletar = readlinesync.questionInt("ID do produto para apagar: ");
-                const pos = produtos.findIndex(p => p.id === idDeletar);
-                if (pos !== -1) {
-                    produtos.splice(pos, 1);
-                    console.log("Produto removido!");
-                } else {
-                    console.log("\nProduto não encontrado!");
-                }
-                keyPress();
+                id = readlinesync.questionInt("ID do produto para apagar: ");
+                produtos.deletar(id);
+                keyPress()
                 break;
 
             default:
-                console.log(colors.fg.whitestrong, "\nopcao Inválida!\n", colors.reset);
-                keyPress();
+                console.log(colors.fg.whitestrong, "\nOpção Inválida!\n", colors.reset);
+                keyPress()
                 break;
-        }
+            } 
+            } catch (error) {
+                if (error instanceof AppError) {
+                    console.log(colors.fg.red, error.message, colors.reset);
+                } else {
+                    console.log(colors.fg.red, "Erro inesperado!", colors.reset);
+                }
+                keyPress();
+            }
+    }
+}
+
+class AppError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "AppError";
     }
 }
 
