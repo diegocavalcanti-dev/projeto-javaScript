@@ -1,4 +1,4 @@
-# Projeto Final - OFFSHOES E-COMMERCE (TypeScript)
+# Projeto Final - OFFSHOES E-COMMERCE
 
 <br />
 
